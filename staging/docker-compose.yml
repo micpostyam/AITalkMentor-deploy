@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ghcr.io/OWNER/aitalkmentor-frontend:staging
+    image: ghcr.io/micpostyam/aitalkmentor-frontend:staging
     container_name: aitalkmentor-staging-frontend
     restart: unless-stopped
     networks:
@@ -14,14 +14,12 @@ services:
       - "traefik.docker.network=aitalkmentor-staging_internal"
 
   backend:
-    image: ghcr.io/OWNER/aitalkmentor-backend:staging
+    image: ghcr.io/micpostyam/aitalkmentor-backend:staging
     container_name: aitalkmentor-staging-backend
     restart: unless-stopped
     env_file: .env
     depends_on:
       db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     volumes:
       - backend-uploads:/app/uploads
@@ -53,19 +51,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: aitalkmentor-staging-redis
-    restart: unless-stopped
-    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
 
 volumes:
   postgres-data:
