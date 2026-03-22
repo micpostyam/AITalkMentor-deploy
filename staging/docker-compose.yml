@@ -11,7 +11,7 @@ services:
       - "traefik.http.routers.aitalkmentor-staging-front.entrypoints=websecure"
       - "traefik.http.routers.aitalkmentor-staging-front.tls.certresolver=letsencrypt"
       - "traefik.http.services.aitalkmentor-staging-front.loadbalancer.server.port=80"
-      - "traefik.docker.network=aitalkmentor-staging_internal"
+      - "traefik.docker.network=staging_internal"
 
   backend:
     image: ghcr.io/micpostyam/aitalkmentor-backend:staging
@@ -32,7 +32,7 @@ services:
       - "traefik.http.routers.aitalkmentor-staging-api.entrypoints=websecure"
       - "traefik.http.routers.aitalkmentor-staging-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.aitalkmentor-staging-api.loadbalancer.server.port=8000"
-      - "traefik.docker.network=aitalkmentor-staging_internal"
+      - "traefik.docker.network=staging_internal"
 
   db:
     image: postgres:15-alpine
