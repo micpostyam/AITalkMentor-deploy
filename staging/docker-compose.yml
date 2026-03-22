@@ -1,0 +1,77 @@
+services:
+  frontend:
+    image: ghcr.io/OWNER/cvcrafted-frontend:staging
+    container_name: cvcrafted-staging-frontend
+    restart: unless-stopped
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cvcrafted-staging-front.rule=Host(`staging.aitalkmentor.fr`)"
+      - "traefik.http.routers.cvcrafted-staging-front.entrypoints=websecure"
+      - "traefik.http.routers.cvcrafted-staging-front.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cvcrafted-staging-front.loadbalancer.server.port=80"
+      - "traefik.docker.network=cvcrafted-staging_internal"
+
+  backend:
+    image: ghcr.io/OWNER/cvcrafted-backend:staging
+    container_name: cvcrafted-staging-backend
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend-uploads:/app/uploads
+      - backend-logs:/app/logs
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cvcrafted-staging-api.rule=Host(`api-staging.aitalkmentor.fr`)"
+      - "traefik.http.routers.cvcrafted-staging-api.entrypoints=websecure"
+      - "traefik.http.routers.cvcrafted-staging-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cvcrafted-staging-api.loadbalancer.server.port=8000"
+      - "traefik.docker.network=cvcrafted-staging_internal"
+
+  db:
+    image: postgres:15-alpine
+    container_name: cvcrafted-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cvcrafted-staging-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres-data:
+  backend-uploads:
+  backend-logs:
+
+networks:
+  internal:
+    driver: bridge

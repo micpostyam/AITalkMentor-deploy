@@ -1,0 +1,77 @@
+services:
+  frontend:
+    image: ghcr.io/OWNER/cvcrafted-frontend:latest
+    container_name: cvcrafted-prod-frontend
+    restart: unless-stopped
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cvcrafted-prod-front.rule=Host(`aitalkmentor.fr`) || Host(`www.aitalkmentor.fr`) || Host(`aitalkmentor.com`) || Host(`www.aitalkmentor.com`)"
+      - "traefik.http.routers.cvcrafted-prod-front.entrypoints=websecure"
+      - "traefik.http.routers.cvcrafted-prod-front.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cvcrafted-prod-front.loadbalancer.server.port=80"
+      - "traefik.docker.network=cvcrafted-prod_internal"
+
+  backend:
+    image: ghcr.io/OWNER/cvcrafted-backend:latest
+    container_name: cvcrafted-prod-backend
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend-uploads:/app/uploads
+      - backend-logs:/app/logs
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cvcrafted-prod-api.rule=Host(`api.aitalkmentor.fr`)"
+      - "traefik.http.routers.cvcrafted-prod-api.entrypoints=websecure"
+      - "traefik.http.routers.cvcrafted-prod-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cvcrafted-prod-api.loadbalancer.server.port=8000"
+      - "traefik.docker.network=cvcrafted-prod_internal"
+
+  db:
+    image: postgres:15-alpine
+    container_name: cvcrafted-prod-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cvcrafted-prod-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres-data:
+  backend-uploads:
+  backend-logs:
+
+networks:
+  internal:
+    driver: bridge
