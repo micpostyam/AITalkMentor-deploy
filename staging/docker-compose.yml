@@ -1,21 +1,21 @@
 services:
   frontend:
-    image: ghcr.io/OWNER/cvcrafted-frontend:staging
-    container_name: cvcrafted-staging-frontend
+    image: ghcr.io/OWNER/aitalkmentor-frontend:staging
+    container_name: aitalkmentor-staging-frontend
     restart: unless-stopped
     networks:
       - internal
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cvcrafted-staging-front.rule=Host(`staging.aitalkmentor.fr`)"
-      - "traefik.http.routers.cvcrafted-staging-front.entrypoints=websecure"
-      - "traefik.http.routers.cvcrafted-staging-front.tls.certresolver=letsencrypt"
-      - "traefik.http.services.cvcrafted-staging-front.loadbalancer.server.port=80"
-      - "traefik.docker.network=cvcrafted-staging_internal"
+      - "traefik.http.routers.aitalkmentor-staging-front.rule=Host(`staging.aitalkmentor.fr`)"
+      - "traefik.http.routers.aitalkmentor-staging-front.entrypoints=websecure"
+      - "traefik.http.routers.aitalkmentor-staging-front.tls.certresolver=letsencrypt"
+      - "traefik.http.services.aitalkmentor-staging-front.loadbalancer.server.port=80"
+      - "traefik.docker.network=aitalkmentor-staging_internal"
 
   backend:
-    image: ghcr.io/OWNER/cvcrafted-backend:staging
-    container_name: cvcrafted-staging-backend
+    image: ghcr.io/OWNER/aitalkmentor-backend:staging
+    container_name: aitalkmentor-staging-backend
     restart: unless-stopped
     env_file: .env
     depends_on:
@@ -30,15 +30,15 @@ services:
       - internal
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cvcrafted-staging-api.rule=Host(`api-staging.aitalkmentor.fr`)"
-      - "traefik.http.routers.cvcrafted-staging-api.entrypoints=websecure"
-      - "traefik.http.routers.cvcrafted-staging-api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.cvcrafted-staging-api.loadbalancer.server.port=8000"
-      - "traefik.docker.network=cvcrafted-staging_internal"
+      - "traefik.http.routers.aitalkmentor-staging-api.rule=Host(`api-staging.aitalkmentor.fr`)"
+      - "traefik.http.routers.aitalkmentor-staging-api.entrypoints=websecure"
+      - "traefik.http.routers.aitalkmentor-staging-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.aitalkmentor-staging-api.loadbalancer.server.port=8000"
+      - "traefik.docker.network=aitalkmentor-staging_internal"
 
   db:
     image: postgres:15-alpine
-    container_name: cvcrafted-staging-db
+    container_name: aitalkmentor-staging-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -56,7 +56,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: cvcrafted-staging-redis
+    container_name: aitalkmentor-staging-redis
     restart: unless-stopped
     command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
     networks:

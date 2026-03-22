@@ -1,11 +1,11 @@
 #!/bin/bash
 # Backup PostgreSQL databases for all environments
 # Usage: ./backup-db.sh [staging|production|all]
-# Add to crontab: 0 3 * * * /opt/apps/cvcrafted-deploy/scripts/backup-db.sh all
+# Add to crontab: 0 3 * * * /opt/apps/aitalkmentor-deploy/scripts/backup-db.sh all
 
 set -e
 
-BACKUP_DIR="/opt/backups/cvcrafted"
+BACKUP_DIR="/opt/backups/aitalkmentor"
 RETENTION_DAYS=7
 DATE=$(date +%Y%m%d_%H%M%S)
 
@@ -13,7 +13,7 @@ mkdir -p "$BACKUP_DIR"
 
 backup_env() {
     local env=$1
-    local container="cvcrafted-${env}-db"
+    local container="aitalkmentor-${env}-db"
 
     if ! docker ps --format '{{.Names}}' | grep -q "^${container}$"; then
         echo "⚠️  Container $container not running, skipping."
