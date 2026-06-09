@@ -1,3 +1,4 @@
+name: aitalkmentor-production
 services:
   frontend:
     image: ghcr.io/micpostyam/aitalkmentor-frontend:latest

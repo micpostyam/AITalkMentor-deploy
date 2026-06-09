@@ -1,3 +1,4 @@
+name: aitalkmentor-staging
 services:
   frontend:
     image: ghcr.io/micpostyam/aitalkmentor-frontend:staging
